@@ -22,6 +22,46 @@ lang: pt
 library(tidyverse)
 ```
 
+## Onde almejamos chegar
+
+```{r}
+dados <- ggridges::lincoln_weather |> 
+  janitor::clean_names() |> 
+  mutate(media_temperatura_c = (mean_temperature_f - 32)/1.8)
+```
+
+
+```{r}
+#| message: false
+dados |> 
+  ggplot(aes(
+    x = media_temperatura_c, 
+    y = month, 
+    fill = stat(x))) + 
+  ggridges::geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_fill_viridis_c(name = "Temp. [C]", option = "C") +
+  coord_cartesian(clip = "off") +
+  labs(title = 'Temperaturas em Lincoln (USA-NE) no ano de 2016')  +
+  ggridges::theme_ridges(font_size = 13, grid = TRUE) +
+  theme(axis.title.y = element_blank())
+```
+
+### Pacotes que criar ggplot completos
+
+Podemos incluir camadas de ggplot nesses pacotes
+```{r}
+#| message: false
+#| warning: false
+dados |> 
+  select(where(is.numeric)) |> 
+  select(contains("mean_")) |> 
+  GGally::ggpairs(progress = FALSE) + 
+    labs(title = 'Título')
+```
+
+
 ## Gráficos nativos
 ```{r}
 
@@ -186,7 +226,8 @@ dados_gapminder |>
   geom_line(aes(group = country),colour = "gray") + #ao agrupar por país, a função cria uma curva que representa a série de tempo de cada país. Quando o argumento group é omitido, as observações de todos os países são ligadas umas às outras na sequência da data, sem agrupar por país.
   geom_smooth()+ # cria a curva de tendência, e nesse caso serve como uma média
   theme_minimal()+ # altera o tema de fundo das legendas de continente dentro do gráfico
-  facet_grid(continent ~ ., scales = "free_y") # cria um eixo y para cada valor da categoria oferecida como argumento, no caso: continent
+  facet_grid(continent ~ .) # essa função produz múltiplos gráficos e os organiza em uma matriz de linhas e colunas. A sintaxe x ~ y oferece qual variável categórica vai determinar as linhas (x) e qual vai determinar as colunas (y). Quando uma das variáveis é omitida por um ponto '.', então cria-se apenas linhas ou colunas, a depender de qual foi omitida. Nesse exemplo, continentes determina a quantidade de linhas, e será organizado em uma coluna.
+
 
 ```
 
